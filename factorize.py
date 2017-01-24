@@ -48,7 +48,7 @@ def checkFactors(n, primes):
 	for p in primes:
 		while n % p == 0:
 			factors.append(p)
-			n = n / p
+			n /= p
 	if n > 1: factors.append(n) # this must be larger than all p, so the list is still sorted
 	return factors
 
@@ -58,7 +58,7 @@ def condense(factors):
 	powerList = []
 	for f in factors:
 		if f == primePower[0]: # if we are still looking at the same factor
-			primePower[1] = primePower[1] + 1 # increment power of factor
+			primePower[1] += 1 # increment power of factor
 		else:
 			powerList.append(primePower) # stick previous one on there
 			primePower = [f, 1] # record instance of new factor
@@ -70,12 +70,21 @@ def condense(factors):
 def powerString(powerList):
 	s = ""
 	for pair in powerList:
-		s = s + "(" + str(pair[0]) + "^" + str(pair[1]) + ")"
+		s += "(" + str(pair[0]) + "^" + str(pair[1]) + ")"
 	return s
 
 # main program structure
 def main(args):
-	n = int(args[1])
+	
+	# takes int if given, converts from ASCII if not
+	try:
+		n = int(args[1])
+	except (TypeError, ValueError):
+		i = 0
+		n = 0
+		for c in args[1]:
+			n += ord(c) * pow(128, i) # converts from base-128
+			i += 1
 	
 	primes = generatePrimes(n)
 	factors = checkFactors(n, primes)

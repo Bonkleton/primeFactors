@@ -23,7 +23,11 @@ def generateFactors(n):
 	primes = [] # list of primes we will use to compare primality
 	factors = [] # list of factors we have found so far
 	bound = int(math.ceil(math.sqrt(n) + 1)) # bound to limit looping
-	i = 2 # the number we will be checking for primality and division
+	#separate loop for 2 so we can skip all even numbers in the main loop
+	while n % 2 == 0:
+		factors.append(2)
+		n /= 2
+	i = 3 # the odd number we will be checking for primality and division
 	while i < bound:
 		if isPrime(i, primes):
 			primes.append(i)
@@ -33,7 +37,7 @@ def generateFactors(n):
 				factors.append(i)
 				n /= i
 			if divides: bound = int(math.ceil(math.sqrt(n) + 1))
-		i += 1
+		i += 2 # increase i by two to skip all even numbers
 	if n > 1: factors.append(n) # this must be larger than all p, so the list is still sorted
 	return factors
 

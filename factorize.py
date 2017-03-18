@@ -5,50 +5,35 @@
 #  
 #  Copyright 2017 Jesse Rominske
 #  
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#  
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#  
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#  
-#  Program to print the prime power factorization of its argument:
-#    python factorize.py <number>
+#  Program to print the prime power factorization of its argument
 
-import math
+import math # we want math
 import sys
 
 # returns primality of i
 def isPrime(i, primes):
+	if i == 2: return True
 	for p in primes:
 		if p <= math.sqrt(i):
 			if i % p == 0: return False
 		else: return True
 
-# produces a list of all primes up to the size of the square root of n
-def generatePrimes(n):
-	primes = [2]
-	bound = int(math.ceil(math.sqrt(n) + 1))
-	for i in range(3, bound):
+# produces a list of the factors of n
+def generateFactors(n):
+	primes = [] # list of primes we will use to compare primality
+	factors = [] # list of factors we have found so far
+	bound = int(math.ceil(math.sqrt(n) + 1)) # bound to limit looping
+	i = 2 # the number we will be checking for primality and division
+	while i < bound:
 		if isPrime(i, primes):
 			primes.append(i)
-	return primes
-
-# produces a list of the factors of n
-def checkFactors(n, primes):
-	factors = []
-	for p in primes:
-		while n % p == 0:
-			factors.append(p)
-			n /= p
+			divides = False
+			while n % i == 0:
+				divides = True
+				factors.append(i)
+				n /= i
+			if divides: bound = int(math.ceil(math.sqrt(n) + 1))
+		i += 1
 	if n > 1: factors.append(n) # this must be larger than all p, so the list is still sorted
 	return factors
 
@@ -65,32 +50,42 @@ def condense(factors):
 			
 	powerList.append(primePower) # stick the last one on there
 	return powerList[1:] # we stuck [0, 0] on there, so get rid of that
-	
-# makes the prime power factorization much nicer to look at
-def powerString(powerList):
+
+# make the list nice to print
+def beautify(powerList):
 	s = ""
 	for pair in powerList:
 		s += "(" + str(pair[0]) + "^" + str(pair[1]) + ")"
-	return s
+	return s	
 
 # main program structure
 def main(args):
-	
-	# takes int if given, converts from ASCII if not
-	try:
-		n = int(args[1])
-	except (TypeError, ValueError):
-		i = 0
-		n = 0
-		for c in args[1]:
-			n += ord(c) * pow(128, i) # converts from base-128
-			i += 1
-	
-	primes = generatePrimes(n)
-	factors = checkFactors(n, primes)
-	powersList = powerString(condense(factors))
-	
-	print(str(n) + " = " + powersList)
+	while True:
+		arg = raw_input("Enter integer: ")
+		
+		# takes int if given, converts from ASCII if not
+		try:
+			n = int(arg)
+		except (TypeError, ValueError):
+			i = 0
+			n = 0
+			for c in arg:
+				n += ord(c) * pow(128, i) # converts from base-128
+				i += 1
+		
+		# case handling for various values of n		
+		if n == 0:
+			print("0 has no factorization")
+		elif n == 1:
+			print("1 has no unique factorization")
+		elif n == -1:
+			print(str(n) + " = (-1^(2k+1))")
+		elif n < 0:
+			powersList = "(-1^(2k+1))" + beautify(condense(generateFactors(-n)))
+			print(str(n) + " = " + powersList)
+		else: 
+			powersList = beautify(condense(generateFactors(n)))
+			print(str(n) + " = " + powersList) # print the answer
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
